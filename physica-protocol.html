@@ -1,0 +1,1626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tickborne Disease Protocol Generator - Physica Energetics</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2C5364 0%, #203A43 50%, #0F2027 100%);
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2C5364 0%, #203A43 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .patient-info {
+            background: #E8F4F8;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border: 2px solid #2C5364;
+        }
+
+        .patient-info h2 {
+            color: #2C5364;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .info-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-field label {
+            font-weight: 600;
+            color: #2C5364;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .info-field input {
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        .info-field input:focus {
+            outline: none;
+            border-color: #2C5364;
+        }
+
+        .markers-section {
+            margin: 30px 0;
+        }
+
+        .category-header {
+            background: linear-gradient(135deg, #2C5364 0%, #203A43 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 30px 0 20px 0;
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .category-header:hover {
+            transform: translateX(5px);
+        }
+
+        .category-header h2 {
+            font-size: 1.6em;
+        }
+
+        .toggle-icon {
+            font-size: 1.5em;
+            transition: transform 0.3s;
+        }
+
+        .toggle-icon.rotated {
+            transform: rotate(180deg);
+        }
+
+        .markers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .marker-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .marker-item:hover {
+            border-color: #2C5364;
+            box-shadow: 0 4px 12px rgba(44,83,100,0.2);
+        }
+
+        .marker-item.detected {
+            background: #E8F4F8;
+            border-color: #2C5364;
+            border-width: 3px;
+        }
+
+        .marker-item label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .marker-item input[type="checkbox"] {
+            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .generate-btn {
+            background: linear-gradient(135deg, #2C5364 0%, #203A43 100%);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            font-size: 1.3em;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(44,83,100,0.3);
+            transition: all 0.3s;
+            display: block;
+            margin: 40px auto;
+            font-weight: 600;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(44,83,100,0.4);
+        }
+
+        .protocol-output {
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 30px;
+            border: 3px solid #2C5364;
+            display: none;
+        }
+
+        .protocol-output.show {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .protocol-output h2 {
+            color: #2C5364;
+            font-size: 2.2em;
+            margin-bottom: 30px;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #2C5364;
+        }
+
+        .patient-summary {
+            background: #E8F4F8;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border-left: 5px solid #2C5364;
+        }
+
+        .patient-summary h3 {
+            color: #2C5364;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .patient-summary p {
+            margin: 8px 0;
+            font-size: 1.1em;
+        }
+
+        .phase {
+            margin: 40px 0;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 6px solid #2C5364;
+        }
+
+        .phase h3 {
+            color: #2C5364;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .phase-number {
+            background: #2C5364;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .product-item {
+            background: white;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border: 2px solid #e0e0e0;
+            transition: all 0.3s;
+        }
+
+        .product-item:hover {
+            border-color: #2C5364;
+            box-shadow: 0 4px 12px rgba(44,83,100,0.15);
+        }
+
+        .product-name {
+            color: #2C5364;
+            font-weight: 700;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+        }
+
+        .product-name::before {
+            content: "✓";
+            background: #2C5364;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 0.9em;
+        }
+
+        .dosing {
+            background: #FFF9C4;
+            padding: 12px;
+            border-radius: 6px;
+            margin: 10px 0;
+            border-left: 4px solid #FBC02D;
+        }
+
+        .dosing strong {
+            color: #F57F17;
+        }
+
+        .indication {
+            color: #555;
+            font-style: italic;
+            margin: 8px 0;
+            padding-left: 20px;
+        }
+
+        .warning {
+            background: #FFEBEE;
+            border-left: 4px solid #C62828;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .warning strong {
+            color: #C62828;
+        }
+
+        .note {
+            background: #E8F4F8;
+            border-left: 4px solid #2C5364;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 6px;
+        }
+
+        .note strong {
+            color: #2C5364;
+        }
+
+        .print-btn {
+            background: #43A047;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 20px 10px;
+            transition: all 0.3s;
+        }
+
+        .print-btn:hover {
+            background: #388E3C;
+            transform: translateY(-2px);
+        }
+
+        .reset-btn {
+            background: #757575;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 20px 10px;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background: #616161;
+            transform: translateY(-2px);
+        }
+
+        .button-group {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .container {
+                box-shadow: none;
+            }
+            
+            .patient-info, .markers-section, .generate-btn, .button-group {
+                display: none !important;
+            }
+            
+            .protocol-output {
+                display: block !important;
+                border: none;
+                padding: 20px;
+            }
+        }
+
+        .category-content {
+            max-height: 2000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+
+        .category-content.collapsed {
+            max-height: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🦠 Tickborne Disease Protocol Generator</h1>
+            <p>Physica Energetics - Drainage-First BioEnergetic Medicine Approach</p>
+        </div>
+
+        <div class="content">
+            <div class="patient-info">
+                <h2>Patient Information</h2>
+                <div class="info-grid">
+                    <div class="info-field">
+                        <label>Patient Name:</label>
+                        <input type="text" id="patientName" placeholder="Enter patient name">
+                    </div>
+                    <div class="info-field">
+                        <label>Date of Birth:</label>
+                        <input type="date" id="patientDOB">
+                    </div>
+                    <div class="info-field">
+                        <label>Test Date:</label>
+                        <input type="date" id="testDate">
+                    </div>
+                    <div class="info-field">
+                        <label>Provider Name:</label>
+                        <input type="text" id="providerName" placeholder="Enter provider name">
+                    </div>
+                </div>
+            </div>
+
+            <div class="markers-section">
+                <div class="note">
+                    <strong>📋 Instructions:</strong> Select ALL markers that tested positive on the Vibrant Wellness Tickborne Disease panel (Complete 1.0 or 2.0). The protocol generator will create a comprehensive, drainage-first treatment plan using Physica Energetics BioEnergetic Medicine principles.
+                </div>
+
+                <!-- LYME PLUS (BORRELIA) -->
+                <div class="category-header" onclick="toggleCategory('lyme')">
+                    <h2>🦟 Lyme Plus - Borrelia Species (40 Antigens + PCR)</h2>
+                    <span class="toggle-icon" id="toggle-lyme">▼</span>
+                </div>
+                <div class="category-content" id="content-lyme">
+                    <div class="markers-grid" id="lyme-grid"></div>
+                </div>
+
+                <!-- TICK-BORNE RELAPSING FEVER -->
+                <div class="category-header" onclick="toggleCategory('tbrf')">
+                    <h2>🦟 Tick-Borne Relapsing Fever (TBRF) (8 Species)</h2>
+                    <span class="toggle-icon" id="toggle-tbrf">▼</span>
+                </div>
+                <div class="category-content" id="content-tbrf">
+                    <div class="markers-grid" id="tbrf-grid"></div>
+                </div>
+
+                <!-- COINFECTIONS 1 -->
+                <div class="category-header" onclick="toggleCategory('coinfections1')">
+                    <h2>🦠 Coinfections 1: Babesia, Bartonella, Anaplasma, Ehrlichia</h2>
+                    <span class="toggle-icon" id="toggle-coinfections1">▼</span>
+                </div>
+                <div class="category-content" id="content-coinfections1">
+                    <div class="markers-grid" id="coinfections1-grid"></div>
+                </div>
+
+                <!-- COINFECTIONS 2 -->
+                <div class="category-header" onclick="toggleCategory('coinfections2')">
+                    <h2>🦠 Coinfections 2: Rickettsia, Viral Infections</h2>
+                    <span class="toggle-icon" id="toggle-coinfections2">▼</span>
+                </div>
+                <div class="category-content" id="content-coinfections2">
+                    <div class="markers-grid" id="coinfections2-grid"></div>
+                </div>
+
+                <!-- OPPORTUNISTIC INFECTIONS -->
+                <div class="category-header" onclick="toggleCategory('opportunistic')">
+                    <h2>🦠 Opportunistic Viral & Bacterial Infections</h2>
+                    <span class="toggle-icon" id="toggle-opportunistic">▼</span>
+                </div>
+                <div class="category-content" id="content-opportunistic">
+                    <div class="markers-grid" id="opportunistic-grid"></div>
+                </div>
+            </div>
+
+            <button class="generate-btn" onclick="generateProtocol()">Generate Physica Protocol 🌿</button>
+
+            <div class="protocol-output" id="protocolOutput"></div>
+
+            <div class="button-group" id="buttonGroup" style="display: none;">
+                <button class="print-btn" onclick="window.print()">🖨️ Print Protocol</button>
+                <button class="reset-btn" onclick="resetForm()">🔄 Reset Form</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const markers = {
+            lyme: [
+                // Borrelia burgdorferi Antigens
+                "Borrelia burgdorferi VlsE1 IgG", "Borrelia burgdorferi VlsE1 IgM",
+                "Borrelia burgdorferi C6 peptide IgG", "Borrelia burgdorferi C6 peptide IgM",
+                "Borrelia burgdorferi p18 (DbpB) IgG", "Borrelia burgdorferi p18 (DbpB) IgM",
+                "Borrelia burgdorferi p23-25 (OspC) IgG", "Borrelia burgdorferi p23-25 (OspC) IgM",
+                "Borrelia burgdorferi p28 IgG", "Borrelia burgdorferi p28 IgM",
+                "Borrelia burgdorferi p30 IgG", "Borrelia burgdorferi p30 IgM",
+                "Borrelia burgdorferi p31 (OspA) IgG", "Borrelia burgdorferi p31 (OspA) IgM",
+                "Borrelia burgdorferi p34 (OspB) IgG", "Borrelia burgdorferi p34 (OspB) IgM",
+                "Borrelia burgdorferi p39 (BmpA) IgG", "Borrelia burgdorferi p39 (BmpA) IgM",
+                "Borrelia burgdorferi p41 IgG", "Borrelia burgdorferi p41 IgM",
+                "Borrelia burgdorferi p45 IgG", "Borrelia burgdorferi p45 IgM",
+                "Borrelia burgdorferi p58 IgG", "Borrelia burgdorferi p58 IgM",
+                "Borrelia burgdorferi p66 IgG", "Borrelia burgdorferi p66 IgM",
+                "Borrelia burgdorferi p83-93 IgG", "Borrelia burgdorferi p83-93 IgM",
+                "Borrelia burgdorferi B31 WCS IgG", "Borrelia burgdorferi B31 WCS IgM",
+                "Borrelia burgdorferi 297 WCS IgG", "Borrelia burgdorferi 297 WCS IgM",
+                "Borrelia burgdorferi PCR",
+                // European Borrelia
+                "Borrelia mayonii IgG", "Borrelia mayonii IgM", "Borrelia mayonii PCR",
+                "Borrelia afzelii BmpA IgG", "Borrelia afzelii BmpA IgM",
+                "Borrelia afzelii DbpA IgG", "Borrelia afzelii DbpA IgM",
+                "Borrelia afzelii OspA IgG", "Borrelia afzelii OspA IgM",
+                "Borrelia afzelii OspC IgG", "Borrelia afzelii OspC IgM",
+                "Borrelia afzelii p100 IgG", "Borrelia afzelii p100 IgM",
+                "Borrelia afzelii PCR",
+                "Borrelia garinii DbpA IgG", "Borrelia garinii DbpA IgM",
+                "Borrelia garinii OspC IgG", "Borrelia garinii OspC IgM",
+                "Borrelia garinii PCR",
+                "Borrelia bavariensis DbpA IgG", "Borrelia bavariensis DbpA IgM",
+                "Borrelia bavariensis p58 IgG", "Borrelia bavariensis p58 IgM",
+                "Borrelia bavariensis VlsE1 IgG", "Borrelia bavariensis VlsE1 IgM",
+                "Borrelia bavariensis PCR",
+                "Borrelia spielmanii DbpA IgG", "Borrelia spielmanii DbpA IgM",
+                "Borrelia spielmanii OspC IgG", "Borrelia spielmanii OspC IgM",
+                "Borrelia spielmanii PCR"
+            ],
+            
+            tbrf: [
+                "Borrelia hermsii IgG", "Borrelia hermsii IgM", "Borrelia hermsii PCR",
+                "Borrelia turicatae IgG", "Borrelia turicatae IgM", "Borrelia turicatae PCR",
+                "Borrelia miyamotoi IgG", "Borrelia miyamotoi IgM", "Borrelia miyamotoi PCR",
+                "Borrelia lonestari PCR",
+                "Borrelia andersonii IgG", "Borrelia andersonii IgM", "Borrelia andersonii PCR",
+                "Borrelia maritima IgG", "Borrelia maritima IgM", "Borrelia maritima PCR",
+                "Borrelia californiensis IgG", "Borrelia californiensis IgM", "Borrelia californiensis PCR",
+                "Borrelia bissettiae IgG", "Borrelia bissettiae IgM",
+                "Borrelia lusitaniae IgG", "Borrelia lusitaniae IgM", "Borrelia lusitaniae PCR",
+                "Borrelia valaisiana IgG", "Borrelia valaisiana IgM", "Borrelia valaisiana PCR",
+                "Borrelia yangtzensis IgG", "Borrelia yangtzensis IgM", "Borrelia yangtzensis PCR",
+                "Borrelia turcica IgG", "Borrelia turcica IgM", "Borrelia turcica PCR"
+            ],
+            
+            coinfections1: [
+                // Babesia
+                "Babesia microti IRA IgG", "Babesia microti IRA IgM",
+                "Babesia microti p32 IgG", "Babesia microti p32 IgM",
+                "Babesia microti p41 IgG", "Babesia microti p41 IgM",
+                "Babesia microti WCS IgG", "Babesia microti WCS IgM",
+                "Babesia microti PCR",
+                "Babesia duncani IgG", "Babesia duncani IgM", "Babesia duncani PCR",
+                // Bartonella
+                "Bartonella henselae 17 kDa IgG", "Bartonella henselae 17 kDa IgM",
+                "Bartonella henselae 26 kDa IgG", "Bartonella henselae 26 kDa IgM",
+                "Bartonella henselae SucB IgG", "Bartonella henselae SucB IgM",
+                "Bartonella henselae PCR",
+                "Bartonella elizabethae IgG", "Bartonella elizabethae IgM", "Bartonella elizabethae PCR",
+                "Bartonella vinsonii IgG", "Bartonella vinsonii IgM", "Bartonella vinsonii PCR",
+                "Bartonella quintana IgG", "Bartonella quintana IgM", "Bartonella quintana PCR",
+                // Anaplasma
+                "Anaplasma phagocytophilum Msp5 IgG", "Anaplasma phagocytophilum Msp5 IgM",
+                "Anaplasma phagocytophilum Msp2 (p44) IgG", "Anaplasma phagocytophilum Msp2 (p44) IgM",
+                "Anaplasma phagocytophilum OmpA IgG", "Anaplasma phagocytophilum OmpA IgM",
+                "Anaplasma phagocytophilum PCR",
+                // Ehrlichia
+                "Ehrlichia chaffeensis IgG", "Ehrlichia chaffeensis IgM", "Ehrlichia chaffeensis PCR"
+            ],
+            
+            coinfections2: [
+                // Rickettsia
+                "Rickettsia typhi OmpB IgG", "Rickettsia typhi OmpB IgM",
+                "Rickettsia typhi Surface antigen IgG", "Rickettsia typhi Surface antigen IgM",
+                "Rickettsia rickettsii PCR", "Rickettsia typhi PCR",
+                // Viral
+                "Powassan Virus IgG", "Powassan Virus IgM", "Powassan virus PCR",
+                "Tickborne Encephalitis Virus IgG", "Tickborne Encephalitis Virus IgM", "Tickborne Encephalitis Virus PCR",
+                "West Nile Virus IgG", "West Nile Virus IgM", "West Nile Virus PCR",
+                // Bacterial
+                "Chlamydophila pneumoniae IgG", "Chlamydophila pneumoniae IgM", "Chlamydophila pneumoniae PCR",
+                "Coxsackie Virus IgG", "Coxsackie Virus IgM", "Coxsackie virus PCR",
+                "Mycoplasma pneumoniae IgG", "Mycoplasma pneumoniae IgM", "Mycoplasma pneumoniae PCR"
+            ],
+            
+            opportunistic: [
+                // CMV (14 markers)
+                "Cytomegalovirus EIA Antigen IgG", "Cytomegalovirus EIA Antigen IgM",
+                "Cytomegalovirus GlyB IgG", "Cytomegalovirus GlyB IgM",
+                "Cytomegalovirus p150 IgG", "Cytomegalovirus p150 IgM",
+                "Cytomegalovirus p28 IgG", "Cytomegalovirus p28 IgM",
+                "Cytomegalovirus p52 IgG", "Cytomegalovirus p52 IgM",
+                "Cytomegalovirus p65 IgG", "Cytomegalovirus p65 IgM",
+                "Cytomegalovirus p38 IgG", "Cytomegalovirus p38 IgM",
+                // EBV (10 markers)
+                "Epstein Barr Virus EA Antigen IgG", "Epstein Barr Virus EA Antigen IgM",
+                "Epstein Barr Virus EBNA1 IgG", "Epstein Barr Virus EBNA1 IgM",
+                "Epstein Barr Virus VCA gp125 IgG", "Epstein Barr Virus VCA gp125 IgM",
+                "Epstein Barr Virus p18 IgG", "Epstein Barr Virus p18 IgM",
+                "Epstein Barr Virus p23 IgG", "Epstein Barr Virus p23 IgM",
+                // Parvovirus (5 markers)
+                "Parvovirus B19 VLP VP2 IgG", "Parvovirus B19 VLP VP2 IgM",
+                "Parvovirus B19 VLP VP1/VP2 Co Capsid IgG", "Parvovirus B19 VLP VP1/VP2 Co Capsid IgM",
+                "Parvovirus B19 PCR",
+                // Toxoplasma (11 markers)
+                "Toxoplasma gondii Crude Extract IgG", "Toxoplasma gondii Crude Extract IgM",
+                "Toxoplasma gondii MIC3 IgG", "Toxoplasma gondii MIC3 IgM",
+                "Toxoplasma gondii p24 IgG", "Toxoplasma gondii p24 IgM",
+                "Toxoplasma gondii p29 IgG", "Toxoplasma gondii p29 IgM",
+                "Toxoplasma gondii p30 IgG", "Toxoplasma gondii p30 IgM",
+                "Toxoplasma gondii PCR",
+                // Herpes Simplex (4 markers)
+                "HSV-1 IgG", "HSV-1 IgM",
+                "HSV-2 IgG", "HSV-2 IgM",
+                // Human Herpes Virus (4 markers)
+                "HHV-6 IgG", "HHV-6 IgM",
+                "HHV-7 IgG", "HHV-7 IgM",
+                // Streptococcal (2 markers)
+                "Streptococcal A IgG", "Streptococcal A IgM"
+            ]
+        };
+
+        function populateMarkers() {
+            Object.keys(markers).forEach(category => {
+                const grid = document.getElementById(`${category}-grid`);
+                markers[category].forEach(marker => {
+                    const div = document.createElement('div');
+                    div.className = 'marker-item';
+                    div.innerHTML = `
+                        <label>
+                            <input type="checkbox" value="${marker}" onchange="toggleMarkerHighlight(this)">
+                            ${marker}
+                        </label>
+                    `;
+                    grid.appendChild(div);
+                });
+            });
+        }
+
+        function toggleMarkerHighlight(checkbox) {
+            const markerItem = checkbox.closest('.marker-item');
+            if (checkbox.checked) {
+                markerItem.classList.add('detected');
+            } else {
+                markerItem.classList.remove('detected');
+            }
+        }
+
+        function toggleCategory(categoryName) {
+            const content = document.getElementById(`content-${categoryName}`);
+            const icon = document.getElementById(`toggle-${categoryName}`);
+            
+            content.classList.toggle('collapsed');
+            icon.classList.toggle('rotated');
+        }
+
+        function generateProtocol() {
+            const patientName = document.getElementById('patientName').value;
+            const patientDOB = document.getElementById('patientDOB').value;
+            const testDate = document.getElementById('testDate').value;
+            const providerName = document.getElementById('providerName').value;
+
+            const selectedMarkers = {
+                lyme: [],
+                tbrf: [],
+                coinfections1: [],
+                coinfections2: [],
+                opportunistic: []
+            };
+
+            Object.keys(selectedMarkers).forEach(category => {
+                document.querySelectorAll(`#${category}-grid input:checked`).forEach(checkbox => {
+                    selectedMarkers[category].push(checkbox.value);
+                });
+            });
+
+            const hasSelections = Object.values(selectedMarkers).some(arr => arr.length > 0);
+            if (!hasSelections) {
+                alert('Please select at least one marker to generate a protocol.');
+                return;
+            }
+
+            let protocolHTML = `
+                <h2>🌿 Personalized Tickborne Disease Protocol - Physica Energetics</h2>
+                
+                <div class="patient-summary">
+                    <h3>Patient Information</h3>
+                    <p><strong>Patient:</strong> ${patientName || 'Not provided'}</p>
+                    <p><strong>Date of Birth:</strong> ${patientDOB || 'Not provided'}</p>
+                    <p><strong>Test Date:</strong> ${testDate || 'Not provided'}</p>
+                    <p><strong>Provider:</strong> ${providerName || 'Not provided'}</p>
+                    <p><strong>Protocol Generated:</strong> ${new Date().toLocaleDateString()}</p>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ CRITICAL PHYSICA ENERGETICS TREATMENT PRINCIPLES:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li><strong>DRAINAGE FIRST ALWAYS:</strong> Lymph 1-2-3 trilogy establishes brain/spinal/matrix drainage before ANY antimicrobial therapy</li>
+                        <li><strong>BIOENERGETIC MEDICINE:</strong> Spagyric botanicals, homeopathic detoxifiers, and sarcode organotherapy work at energetic/informational level</li>
+                        <li><strong>LAYERING & SEQUENCING:</strong> Products must be introduced gradually and in specific order to prevent overwhelming detox pathways</li>
+                        <li><strong>HOMEOPATHIC NOSODES:</strong> Bacteria-Tox contains Lyme disease nosode for energetic desensitization</li>
+                        <li><strong>BIOPHOTONIC MATRIX:</strong> All Intrinsic botanicals contain Himalayan Shilajit, fulvic/humic acids, and 72 trace minerals for enhanced bioavailability</li>
+                    </ul>
+                </div>
+            `;
+
+            // PHASE 1: DRAINAGE
+            protocolHTML += generatePhysicaPhase1(selectedMarkers);
+
+            // PHASE 2: TARGETED TREATMENT
+            protocolHTML += generatePhysicaPhase2(selectedMarkers);
+
+            // PHASE 3: RESTORATION
+            protocolHTML += generatePhysicaPhase3(selectedMarkers);
+
+            // ONGOING MAINTENANCE
+            protocolHTML += generatePhysicaOngoing(selectedMarkers);
+
+            document.getElementById('protocolOutput').innerHTML = protocolHTML;
+            document.getElementById('protocolOutput').classList.add('show');
+            document.getElementById('buttonGroup').style.display = 'block';
+            
+            document.getElementById('protocolOutput').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function generatePhysicaPhase1(markers) {
+            const allMarkers = [...markers.lyme, ...markers.tbrf, ...markers.coinfections1, ...markers.coinfections2, ...markers.opportunistic];
+            
+            let html = `
+                <div class="phase">
+                    <h3><span class="phase-number">1</span>BioToxicosis Drainage Phase (Weeks 1-4)</h3>
+                    <p><strong>Primary Goal:</strong> Establish complete drainage from central nervous system → organs → extracellular matrix BEFORE any antimicrobial intervention. This prevents Herxheimer reactions and ensures elimination pathways are open.</p>
+                    
+                    <div class="note">
+                        <strong>🔑 PHYSICA ENERGETICS DRAINAGE PHILOSOPHY:</strong> "The body is a flow system." Drainage addresses lymphatic congestion and ECM clarification required for all chronic infection protocols. The Lymph 1-2-3 trilogy follows the principle of "right time, right level, right sequence" - treating from central to peripheral, superficial to deep.
+                    </div>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">💧 BioToxicosis Drainage Trilogy (Sequential 21-Day Protocol)</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">WEEK 1: Lymph 1 Acute (Initial Inflammation)</div>
+                        <div class="indication">Addresses acute inflammation and initial lymphatic congestion - prepares superficial drainage pathways</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper (30 drops) 2x daily in warm water</div>
+                        <div class="dosing"><strong>Timing:</strong> Days 1-7</div>
+                        <div class="dosing"><strong>Rationale:</strong> Opens initial drainage channels in acute/superficial tissues</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">WEEK 2: Lymph 2 Matrix (Deeper ECM Congestion)</div>
+                        <div class="indication">Targets extracellular matrix and deeper connective tissue drainage</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper (30 drops) 2x daily in warm water</div>
+                        <div class="dosing"><strong>Timing:</strong> Days 8-14</div>
+                        <div class="dosing"><strong>Rationale:</strong> Clears mesenchyme (Pishinger space) where toxins accumulate</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">WEEK 3: Lymph 3 Chronic (Deepest Longstanding Conditions)</div>
+                        <div class="indication">Addresses chronic, deep-seated lymphatic stagnation and cellular-level toxin accumulation</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper (30 drops) 2x daily in warm water</div>
+                        <div class="dosing"><strong>Timing:</strong> Days 15-21</div>
+                        <div class="dosing"><strong>Rationale:</strong> Reaches deepest tissues where chronic infections reside</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">WEEK 4+: Continue Lymph 3 Chronic (Ongoing Drainage)</div>
+                        <div class="indication">Maintain drainage throughout entire antimicrobial protocol</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily throughout treatment</div>
+                        <div class="dosing"><strong>Duration:</strong> Continue through ALL phases of protocol</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Drainage Milieu</div>
+                        <div class="indication">Additional drainage tonifier - combines low-potency homeopathic glandulars with Spagyric botanicals for comprehensive organ drainage</div>
+                        <div class="dosing"><strong>Dosing:</strong> 30 drops 2x daily in warm water</div>
+                        <div class="dosing"><strong>Timing:</strong> Start Week 2, continue throughout protocol</div>
+                        <div class="dosing"><strong>Rationale:</strong> Supports liver, kidney, and lymphatic organ function</div>
+                    </div>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">🌿 Foundation Support (Begin Week 2)</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">NAC Forte (N-Acetyl L-Cysteine)</div>
+                        <div class="indication">Glutathione precursor for cellular detoxification and antioxidant support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 capsule at breakfast, 2 capsules at dinner</div>
+                        <div class="dosing"><strong>Rationale:</strong> Supports Phase II liver detoxification critical for processing infection byproducts</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Glutathione (GSH) Liposome</div>
+                        <div class="indication">Direct reduced glutathione in liposomal delivery - master antioxidant</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1-2 teaspoons daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Critical for Phase II conjugation of toxins; liposomal delivery bypasses GI degradation</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">SpectraLyte</div>
+                        <div class="indication">Electrolyte and trace mineral support - 72 ionic minerals</div>
+                        <div class="dosing"><strong>Dosing:</strong> 15 drops in 1oz distilled water, juice, rice dream, etc. twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Chronic infections deplete minerals; essential for enzymatic function and cellular ATP production</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Camu Camu Vitamin C Liposome</div>
+                        <div class="indication">High-dose natural vitamin C in liposomal delivery</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 teaspoon 10 minutes before breakfast, lunch, and dinner</div>
+                        <div class="dosing"><strong>Rationale:</strong> Immune support, collagen synthesis, antioxidant protection during infection treatment</div>
+                    </div>
+
+                    <div class="note">
+                        <strong>📅 DRAINAGE PHASE DURATION:</strong> Minimum 3-4 weeks before introducing antimicrobial protocols. Patients with severe toxic burden or multiple chronic infections may require 6-8 weeks of drainage before beginning kill phase.
+                    </div>
+
+                    <div class="warning">
+                        <strong>⚠️ DRAINAGE PHASE OBSERVATIONS:</strong> Patients may experience initial detox symptoms (fatigue, headache, mild flu-like symptoms) as drainage pathways open. This is normal and indicates toxin mobilization. If severe, reduce drainage remedies to 10-15 drops 2x daily and increase water intake to 80-100oz daily.
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        function generatePhysicaPhase2(markers) {
+            const hasLyme = markers.lyme.length > 0 || markers.tbrf.length > 0;
+            const hasBabesia = markers.coinfections1.some(m => m.includes('Babesia'));
+            const hasBartonella = markers.coinfections1.some(m => m.includes('Bartonella'));
+            const hasAnaplasma = markers.coinfections1.some(m => m.includes('Anaplasma'));
+            const hasEhrlichia = markers.coinfections1.some(m => m.includes('Ehrlichia'));
+            const hasMycoplasma = markers.coinfections2.some(m => m.includes('Mycoplasma'));
+            const hasRickettsia = markers.coinfections2.some(m => m.includes('Rickettsia'));
+            const hasViralCoinfections = markers.coinfections2.some(m => m.includes('Virus') || m.includes('Coxsackie'));
+            const hasEBV = markers.opportunistic.some(m => m.includes('Epstein Barr'));
+            const hasCMV = markers.opportunistic.some(m => m.includes('Cytomegalovirus'));
+            const hasHHV = markers.opportunistic.some(m => m.includes('HHV'));
+            const hasHSV = markers.opportunistic.some(m => m.includes('HSV'));
+            const hasToxoplasma = markers.opportunistic.some(m => m.includes('Toxoplasma'));
+            const hasStrep = markers.opportunistic.some(m => m.includes('Streptococcal'));
+            const hasChlamydia = markers.coinfections2.some(m => m.includes('Chlamydophila'));
+
+            let html = `
+                <div class="phase">
+                    <h3><span class="phase-number">2</span>Targeted Antimicrobial Phase (Weeks 5-20+)</h3>
+                    <p><strong>Primary Goal:</strong> Address specific tickborne infections using Physica Energetics' homeopathic detoxifiers (Tox's), Spagyric botanicals (Intrinsics), and nutritional antimicrobials while maintaining drainage support.</p>
+                    
+                    <div class="warning">
+                        <strong>⚠️ CONTINUE DRAINAGE:</strong> Maintain Lymph 3 Chronic (1 dropper 2x daily) and Drainage Milieu (30 drops 2x daily) throughout this ENTIRE phase. This is non-negotiable.
+                    </div>
+            `;
+
+            // LYME/BORRELIA PROTOCOL
+            if (hasLyme) {
+                html += `
+                    <h4 style="color: #C62828; margin: 20px 0 15px 0;">🦟 Lyme Disease (Borrelia) Core Protocol</h4>
+                    <p style="margin-bottom: 15px;"><strong>Detected Borrelia Species (${markers.lyme.length + markers.tbrf.length} markers):</strong></p>
+                    <div style="background: #FFEBEE; padding: 15px; border-radius: 8px; margin: 15px 0; max-height: 150px; overflow-y: auto;">
+                        <em>Lyme Plus: ${markers.lyme.join(', ')}<br>TBRF: ${markers.tbrf.join(', ')}</em>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Bacteria-Tox</div>
+                        <div class="indication">CORE LYME NOSODE - Homeopathic relief of bacterial issues including Lyme disease nosode 12X, 30X, 200X</div>
+                        <div class="dosing"><strong>Dosing - General:</strong> 1 full dropper 2x daily in warm water</div>
+                        <div class="dosing"><strong>Dosing - Chronic Lyme:</strong> 2 full droppers 2x daily in warm water</div>
+                        <div class="dosing"><strong>Duration:</strong> 12-24 weeks minimum</div>
+                        <div class="dosing"><strong>Ingredients Include:</strong> Lyme disease nosode 12X, 30X, 200X; BAC nosode 12X, 30X, 60X; Lomatium dissectum; Tabebuia impetiginosa (Pau d'arco); Hydrastis canadensis</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Cat's Claw Intrinsic (Uncaria tomentosa)</div>
+                        <div class="indication">ESSENTIAL LYME BOTANICAL - Immune modulation, anti-inflammatory, anti-spirochete activity</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily in warm water</div>
+                        <div class="dosing"><strong>Acute/Chronic:</strong> 2 full droppers 2x daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Cat's Claw is considered one of the most important Lyme herbs - enhances phagocytosis, modulates inflammatory cytokines</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Wild Bear Garlic (Allium ursinum)</div>
+                        <div class="indication">Broad-spectrum antimicrobial - 4x more active compounds than cultivated garlic</div>
+                        <div class="dosing"><strong>Dosing - General:</strong> 1 capsule daily</div>
+                        <div class="dosing"><strong>Dosing - Acute:</strong> 4 capsules 3x daily</div>
+                        <div class="dosing"><strong>Dosing - Chronic Lyme:</strong> 2 capsules 2x daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Contains 4x more ajoenes and adenosine than regular garlic; powerful biofilm disruptor</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Berberine Intrinsic</div>
+                        <div class="indication">Antimicrobial, anti-inflammatory, supports healthy cellular metabolism</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily, up to 2 droppers 3x daily for chronic infections</div>
+                        <div class="dosing"><strong>Rationale:</strong> Berberine has demonstrated activity against Borrelia and supports mitochondrial function</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Lapacho Intrinsic (Pau d'arco)</div>
+                        <div class="indication">Antifungal, antibacterial, anti-parasitic, immune support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Chronic:</strong> 2 full droppers 2x daily</div>
+                    </div>
+
+                    <div class="note">
+                        <strong>🎯 LYME TREATMENT PROTOCOL SEQUENCE:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li><strong>Weeks 5-8:</strong> Bacteria-Tox ONLY (1-2 droppers 2x daily) - allow homeopathic nosode to begin energetic desensitization</li>
+                            <li><strong>Weeks 9-10:</strong> Add Cat's Claw Intrinsic (1 dropper 2x daily)</li>
+                            <li><strong>Weeks 11-12:</strong> Add Wild Bear Garlic (2 caps 2x daily)</li>
+                            <li><strong>Weeks 13+:</strong> Add Berberine Intrinsic and Lapacho Intrinsic as tolerated</li>
+                            <li><strong>Duration:</strong> Minimum 16-24 weeks total treatment</li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            // BABESIA PROTOCOL
+            if (hasBabesia) {
+                html += `
+                    <h4 style="color: #C62828; margin: 20px 0 15px 0;">🦠 Babesia Protocol</h4>
+                    <p style="margin-bottom: 15px;"><strong>Detected Babesia Markers:</strong> ${markers.coinfections1.filter(m => m.includes('Babesia')).join(', ')}</p>
+
+                    <div class="warning">
+                        <strong>⚠️ BABESIA IS A BIOFILM MASTER:</strong> Requires biofilm disruption before antimicrobials will be effective. Use CataZyme-7 2-3 weeks before starting antimicrobials.
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">CataZyme-7 (Biofilm Disruptor)</div>
+                        <div class="indication">Systemic enzyme formula - disrupts biofilms and enhances antimicrobial penetration</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 capsule at breakfast, 2 capsules at dinner</div>
+                        <div class="dosing"><strong>Timing:</strong> Start 2-3 weeks BEFORE antimicrobials, then continue throughout</div>
+                        <div class="dosing"><strong>Critical:</strong> Take on EMPTY stomach (45+ min before meals)</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Artemisia Intrinsic (Wormwood)</div>
+                        <div class="indication">CORE BABESIA HERB - Antiparasitic, antimalarial activity</div>
+                        <div class="dosing"><strong>Dosing - General:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Dosing - Acute:</strong> 2 full droppers 6x daily (3-5 days)</div>
+                        <div class="dosing"><strong>Dosing - Chronic Babesia:</strong> 2 full droppers 2x daily</div>
+                        <div class="dosing"><strong>Duration:</strong> 12-16 weeks minimum</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Para-Tox</div>
+                        <div class="indication">Homeopathic relief of parasitic issues - contains parasite nosodes 30X, 60X, 200X</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily, up to 2 droppers 2x daily for chronic</div>
+                        <div class="dosing"><strong>Rationale:</strong> Babesia is a protozoan parasite - homeopathic support aids energetic clearing</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Myrrh Intrinsic</div>
+                        <div class="indication">Mucosal support, respiratory system, antimicrobial</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Babesia often causes respiratory symptoms (air hunger) - myrrh supports respiratory function</div>
+                    </div>
+
+                    <div class="note">
+                        <strong>🎯 BABESIA PROTOCOL LAYERING:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li><strong>Weeks 5-7:</strong> CataZyme-7 ONLY for biofilm disruption</li>
+                            <li><strong>Week 8:</strong> Add Para-Tox (1 dropper 2x daily)</li>
+                            <li><strong>Week 9:</strong> Add Artemisia Intrinsic (start 1 dropper 2x daily, increase to 2 droppers after 1 week)</li>
+                            <li><strong>Week 11:</strong> Add Myrrh Intrinsic if respiratory symptoms present</li>
+                            <li><strong>Continue CataZyme-7 throughout</strong></li>
+                        </ul>
+                    </div>
+                `;
+            }
+
+            // BARTONELLA PROTOCOL
+            if (hasBartonella) {
+                html += `
+                    <h4 style="color: #C62828; margin: 20px 0 15px 0;">🦠 Bartonella Protocol</h4>
+                    <p style="margin-bottom: 15px;"><strong>Detected Bartonella Species:</strong> ${markers.coinfections1.filter(m => m.includes('Bartonella')).join(', ')}</p>
+
+                    <div class="warning">
+                        <strong>⚠️ BARTONELLA IS VASCULAR:</strong> Infects endothelial cells and creates biofilms. Requires vascular support and biofilm disruption.
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">CataZyme-7</div>
+                        <div class="indication">Essential biofilm disruptor for Bartonella</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 capsule breakfast, 2 capsules dinner (empty stomach)</div>
+                        <div class="dosing"><strong>Duration:</strong> Start 2 weeks before antimicrobials, continue throughout</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Berberine Intrinsic</div>
+                        <div class="indication">Primary Bartonella antimicrobial - inhibits bacterial adhesion to endothelium</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Chronic:</strong> 2 full droppers 3x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Wild Oregano Oil</div>
+                        <div class="indication">Wildcrafted oregano oil (minimum 80% carvacrol) - potent antibacterial</div>
+                        <div class="dosing"><strong>Dosing - General:</strong> 1 soft gel daily with meals</div>
+                        <div class="dosing"><strong>Dosing - Acute:</strong> 3 soft gels 3x daily with meals</div>
+                        <div class="dosing"><strong>Dosing - Chronic Bartonella:</strong> 1 soft gel 2x daily with meals</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Hawthorn Intrinsic</div>
+                        <div class="indication">Cardiovascular support - Bartonella affects vascular endothelium</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Supports vascular integrity and circulation</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Bacteria-Tox</div>
+                        <div class="indication">Homeopathic bacterial nosode support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                    </div>
+                `;
+            }
+
+            // ANAPLASMA/EHRLICHIA PROTOCOL
+            if (hasAnaplasma || hasEhrlichia) {
+                html += `
+                    <h4 style="color: #C62828; margin: 20px 0 15px 0;">🦠 Anaplasma/Ehrlichia Protocol</h4>
+                    <p style="margin-bottom: 15px;"><strong>Detected:</strong> ${[...markers.coinfections1.filter(m => m.includes('Anaplasma')), ...markers.coinfections1.filter(m => m.includes('Ehrlichia'))].join(', ')}</p>
+
+                    <div class="product-item">
+                        <div class="product-name">Bacteria-Tox</div>
+                        <div class="indication">Core bacterial nosode protocol</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1-2 full droppers 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Olive Leaf Intrinsic</div>
+                        <div class="indication">Broad-spectrum antimicrobial - effective against intracellular bacteria</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Chronic:</strong> 2 full droppers 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Wild Bear Garlic</div>
+                        <div class="indication">Supports immune response against intracellular pathogens</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 capsules 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Spleen LF</div>
+                        <div class="indication">Spleen support - Anaplasma/Ehrlichia infect white blood cells</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 capsules twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Lyophilized New Zealand spleen glandular supports immune function</div>
+                    </div>
+                `;
+            }
+
+            // MYCOPLASMA PROTOCOL
+            if (hasMycoplasma) {
+                html += `
+                    <h4 style="color: #C62828; margin: 20px 0 15px 0;">🦠 Mycoplasma Pneumoniae Protocol</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">Mycoplasma-Tox</div>
+                        <div class="indication">Homeopathic mycoplasma nosode support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Chronic:</strong> 2 full droppers 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Olive Leaf Intrinsic</div>
+                        <div class="indication">Primary antimicrobial for mycoplasma</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 full droppers 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Wild Oregano Oil</div>
+                        <div class="indication">Potent antimicrobial</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1-2 soft gels 2x daily with food</div>
+                    </div>
+                `;
+            }
+
+            // VIRAL PROTOCOLS
+            if (hasEBV || hasCMV || hasHHV || hasHSV || hasViralCoinfections) {
+                html += `
+                    <h4 style="color: #C62828; margin: 20px 0 15px 0;">🦠 Viral Infection Protocol</h4>
+                    <p style="margin-bottom: 15px;"><strong>Detected Viruses:</strong> ${[...markers.coinfections2.filter(m => m.includes('Virus') || m.includes('Coxsackie')), ...markers.opportunistic.filter(m => m.includes('Epstein') || m.includes('Cytomegalovirus') || m.includes('HHV') || m.includes('HSV'))].join(', ')}</p>
+
+                    <div class="product-item">
+                        <div class="product-name">Viru-Tox</div>
+                        <div class="indication">CORE VIRAL DETOXIFIER - Homeopathic multi-dimensional viral support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Chronic Viral:</strong> 2 full droppers 3x daily</div>
+                        <div class="dosing"><strong>Duration:</strong> 12-24 weeks for chronic reactivated viruses</div>
+                    </div>
+                `;
+
+                if (hasEBV) {
+                    html += `
+                        <div class="product-item">
+                            <div class="product-name">Mono-Tox</div>
+                            <div class="indication">Homeopathic EBV/mononucleosis support</div>
+                            <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                            <div class="dosing"><strong>Rationale:</strong> EBV causes mononucleosis; Mono-Tox provides targeted energetic support</div>
+                        </div>
+                    `;
+                }
+
+                if (hasHSV || hasHHV) {
+                    html += `
+                        <div class="product-item">
+                            <div class="product-name">HZ-Tox</div>
+                            <div class="indication">Herpes Zoster (shingles) and herpes virus family support</div>
+                            <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                            <div class="dosing"><strong>Rationale:</strong> Supports nerve detoxification, viral/heavy metal removal from nerves</div>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="product-item">
+                        <div class="product-name">Olive Leaf Intrinsic</div>
+                        <div class="indication">Broad-spectrum antiviral botanical</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Chronic Viral:</strong> 2 full droppers 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Lapacho Intrinsic</div>
+                        <div class="indication">Antiviral (EBV/CMV/Mono), immune support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1-2 full droppers 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Mycelia Intrinsic Liposome</div>
+                        <div class="indication">Medicinal mushroom complex (Cordyceps, Reishi, Shiitake, Chaga, Turkey Tail) - immune modulation</div>
+                        <div class="dosing"><strong>Dosing:</strong> 90 drops twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Medicinal mushrooms have demonstrated antiviral activity and enhance natural killer cell function</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Echina Intrinsic (Echinacea)</div>
+                        <div class="indication">Immune stimulation, antiviral</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Acute Viral:</strong> 2 full droppers 6x daily (3-5 days)</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Sambucus Intrinsic (Elderberry)</div>
+                        <div class="indication">Antiviral - inhibits viral replication</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Acute:</strong> 2 full droppers 6x daily</div>
+                    </div>
+                `;
+            }
+
+            // TOXOPLASMA
+            if (hasToxoplasma) {
+                html += `
+                    <h4 style="color: #C62828; margin: 20px 0 15px 0;">🦠 Toxoplasma Gondii Protocol</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">Para-Tox</div>
+                        <div class="indication">Antiparasitic homeopathic - includes parasite nosodes</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Chronic:</strong> 2 full droppers 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Artemisia Intrinsic</div>
+                        <div class="indication">Antiparasitic botanical</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1-2 full droppers 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Wild Bear Garlic</div>
+                        <div class="indication">Broad antimicrobial including antiparasitic activity</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 capsules 2x daily</div>
+                    </div>
+                `;
+            }
+
+            // IMMUNE SUPPORT FOR ALL
+            html += `
+                <h4 style="color: #2C5364; margin: 20px 0 15px 0;">🛡️ Essential Immune & Mitochondrial Support (All Protocols)</h4>
+
+                <div class="product-item">
+                    <div class="product-name">Thymus LF</div>
+                    <div class="indication">Thymus glandular - critical for T-cell function and cell-mediated immunity</div>
+                    <div class="dosing"><strong>Dosing:</strong> 2 capsules twice daily before breakfast and lunch</div>
+                    <div class="dosing"><strong>Rationale:</strong> Lyophilized New Zealand thymus supports immune function against intracellular pathogens</div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-name">Thymus Code</div>
+                    <div class="indication">Homeopathic thymus support - drainage tonifier</div>
+                    <div class="dosing"><strong>Dosing:</strong> 30 drops 2x daily</div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-name">Spleen LF</div>
+                    <div class="indication">Spleen glandular for blood filtration and immune support</div>
+                    <div class="dosing"><strong>Dosing:</strong> 2 capsules 2x daily</div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-name">Adrenal LF</div>
+                    <div class="indication">Adrenal support - chronic infections deplete adrenal reserves</div>
+                    <div class="dosing"><strong>Dosing:</strong> 2 capsules twice daily (morning and 4pm)</div>
+                    <div class="dosing"><strong>Rationale:</strong> Supports cortisol production and stress response during treatment</div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-name">CoQ10 Liposome Tincture</div>
+                    <div class="indication">Mitochondrial support - critical for cellular energy production</div>
+                    <div class="dosing"><strong>Dosing:</strong> 30 drops twice daily</div>
+                    <div class="dosing"><strong>Rationale:</strong> Chronic infections damage mitochondria; CoQ10 essential for ATP production and antioxidant protection</div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-name">Solray-D3 + K2 Liposome Spray</div>
+                    <div class="indication">Vitamin D3 (5000 IU) + K2 - immune modulation</div>
+                    <div class="dosing"><strong>Dosing:</strong> 10-15+ sprays daily (depending on vitamin D levels)</div>
+                    <div class="dosing"><strong>Rationale:</strong> Vitamin D critical for antimicrobial peptide production and T-cell function</div>
+                </div>
+
+                <div class="product-item">
+                    <div class="product-name">Zinc-Oro Liposome Composite</div>
+                    <div class="indication">Liposomal zinc - essential for immune function</div>
+                    <div class="dosing"><strong>Dosing:</strong> 120 drops twice daily</div>
+                    <div class="dosing"><strong>Rationale:</strong> Zinc required for over 300 enzymatic reactions; critical for T-cell maturation</div>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ HERXHEIMER REACTION MANAGEMENT:</strong>
+                    <ul style="margin-top: 10px; margin-left: 20px;">
+                        <li><strong>Increase drainage:</strong> Add Lymph 1 or Lymph 2 (1 dropper 3x daily) temporarily</li>
+                        <li><strong>Increase binders:</strong> Consider adding activated charcoal or bentonite clay between doses</li>
+                        <li><strong>Electrolyte support:</strong> Increase SpectraLyte to 20 drops 3x daily</li>
+                        <li><strong>Reduce antimicrobials:</strong> Cut doses in half temporarily if Herx reaction severe</li>
+                        <li><strong>Hydration:</strong> 80-100oz water daily MINIMUM</li>
+                        <li><strong>Rest:</strong> Allow body to process die-off toxins</li>
+                    </ul>
+                </div>
+
+                <div class="note">
+                    <strong>📅 PHASE 2 DURATION:</strong> 16-24 weeks minimum for chronic tickborne disease. Lyme and coinfections require extended treatment due to slow replication cycles and biofilm protection. Re-test at 20 weeks to assess progress.
+                </div>
+            </div>
+        `;
+
+            return html;
+        }
+
+        function generatePhysicaPhase3(markers) {
+            let html = `
+                <div class="phase">
+                    <h3><span class="phase-number">3</span>Restoration & Repair Phase (Weeks 21-32+)</h3>
+                    <p><strong>Primary Goal:</strong> Restore gut barrier integrity, support mitochondrial repair, modulate immune function, and establish long-term wellness using Physica Energetics' foundation formulas.</p>
+
+                    <div class="note">
+                        <strong>🔑 RESTORATION AFTER CHRONIC INFECTION:</strong> Chronic tickborne diseases cause gut dysbiosis, mitochondrial damage, neurotoxicity, and immune dysfunction. This phase rebuilds foundational health systems damaged during infection.
+                    </div>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">🌱 Gut & Microbiome Restoration</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">Flora Syntropy</div>
+                        <div class="indication">CORE PROBIOTIC - Multi-strain formula with prebiotic support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 3 capsules before breakfast, 3 capsules before lunch, 3 capsules before bed</div>
+                        <div class="dosing"><strong>Duration:</strong> Minimum 12-16 weeks</div>
+                        <div class="dosing"><strong>Rationale:</strong> Chronic antibiotics and infections destroy beneficial gut bacteria; restoration critical for immune function</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Saccharomyces boulardii Forte</div>
+                        <div class="indication">Beneficial yeast - prevents C. difficile, supports gut barrier</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 capsule daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> S. boulardii produces butyrate, supports tight junctions, competitive inhibition of pathogens</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Glutamine Complex PLG-U Powder</div>
+                        <div class="indication">L-glutamine for gut lining repair - fuel for enterocytes</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1-2 scoops in water/smoothie twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Glutamine is primary fuel for intestinal cells; essential for tight junction repair</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">GALT Fortifier</div>
+                        <div class="indication">Gut-Associated Lymphoid Tissue support - 70% of immune system resides in gut</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 capsule before breakfast, 2 capsules before bed</div>
+                        <div class="dosing"><strong>Rationale:</strong> Supports immune function at mucosal level</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Hypo Zymase</div>
+                        <div class="indication">Comprehensive digestive enzyme formula</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1-2 tablets with each meal</div>
+                        <div class="dosing"><strong>Rationale:</strong> Supports complete macronutrient digestion impaired by chronic infection</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">HepataGest Powder</div>
+                        <div class="indication">Liver/gallbladder support - bile flow, fat digestion</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 scoop in water/smoothie twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Supports Phase I and II liver detoxification after extended antimicrobial therapy</div>
+                    </div>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">⚡ Mitochondrial & Cellular Repair</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">Rejuvan NMN Liposome Composite</div>
+                        <div class="indication">NAD+ precursor - mitochondrial biogenesis and cellular energy</div>
+                        <div class="dosing"><strong>Dosing:</strong> 3 sprays twice daily (breakfast and lunch)</div>
+                        <div class="dosing"><strong>Rationale:</strong> Chronic infections deplete NAD+; NMN restores cellular energy production and supports DNA repair</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">CoQ10 Liposome Tincture</div>
+                        <div class="indication">Continue from Phase 2 - mitochondrial electron transport chain</div>
+                        <div class="dosing"><strong>Dosing:</strong> 30 drops 2x daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Acetyl L-Carnitine</div>
+                        <div class="indication">Mitochondrial fatty acid transport, neuroprotection</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 capsule twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Supports mitochondrial function and cognitive repair after neurotoxic infections</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">PRP53 Code Liposome Spray</div>
+                        <div class="indication">Supports cellular repair and longevity pathways</div>
+                        <div class="dosing"><strong>Dosing:</strong> 3 sprays twice daily</div>
+                    </div>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">🧠 Neurological & Cognitive Support</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">ASuRA Brain</div>
+                        <div class="indication">Comprehensive brain support formula - neuroprotection, neurotransmitter support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 capsules twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Addresses neurotoxicity from Lyme neurotoxins, Bartonella, and other infections</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Ginkgo Intrinsic</div>
+                        <div class="indication">Cerebral circulation, neuroprotection, antioxidant</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 full dropper 2x daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Improves blood flow to brain; supports cognitive function recovery</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Lithium-Oro Liposome Composite</div>
+                        <div class="indication">Trace lithium for neuroprotection and mood stabilization</div>
+                        <div class="dosing"><strong>Dosing:</strong> 120 drops twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Low-dose lithium supports neuroplasticity and protects against neurotoxicity</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Magnesium (Buffered) BisGlycinate + L-Taurine</div>
+                        <div class="indication">Nervous system support, cellular relaxation</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 capsule at breakfast, lunch, and 2 capsules before bed</div>
+                        <div class="dosing"><strong>Rationale:</strong> Magnesium essential for 300+ enzymatic reactions; taurine supports GABA</div>
+                    </div>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">🌿 Anti-Inflammatory & Antioxidant Support</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">Bio-A Curcumin PhytoNanosome</div>
+                        <div class="indication">Highly bioavailable curcumin - potent anti-inflammatory</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 capsule twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Modulates inflammatory cytokines elevated in chronic infection</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Green Tea Catechins</div>
+                        <div class="indication">EGCG and polyphenols - antioxidant, anti-inflammatory</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 capsule twice daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Baicalin Skullcap</div>
+                        <div class="indication">Anti-inflammatory, neuroprotective, antiviral</div>
+                        <div class="dosing"><strong>Dosing:</strong> 60 drops twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> Crosses blood-brain barrier; reduces neuroinflammation</div>
+                    </div>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">🏋️ Cellular & Systemic Support</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">BioHealth Matrix</div>
+                        <div class="indication">Comprehensive multivitamin/mineral/antioxidant formula</div>
+                        <div class="dosing"><strong>Dosing:</strong> 6 capsules daily (2 with each meal)</div>
+                        <div class="dosing"><strong>Rationale:</strong> Replenishes micronutrients depleted during chronic infection and treatment</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Vitamin B Coenzyme Complex Liposome</div>
+                        <div class="indication">Methylated B-complex in liposomal delivery</div>
+                        <div class="dosing"><strong>Dosing:</strong> 3 sprays twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> B vitamins essential for energy production, methylation, neurotransmitter synthesis</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Methyl-B12 Liposome Spray</div>
+                        <div class="indication">Methylcobalamin B12 for nervous system repair</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 sprays twice daily</div>
+                        <div class="dosing"><strong>Rationale:</strong> B12 critical for myelin repair and nerve function</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Collagen Peptides LF Powder</div>
+                        <div class="indication">Collagen for connective tissue repair</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 scoop daily in smoothie or beverage</div>
+                        <div class="dosing"><strong>Rationale:</strong> Supports joint, skin, and gut lining integrity after chronic infection</div>
+                    </div>
+
+                    <div class="note">
+                        <strong>📅 RESTORATION PHASE DURATION:</strong> Minimum 12-16 weeks. Many patients require 6-12 months to fully restore cellular function, gut health, and energy levels after chronic tickborne disease.
+                    </div>
+
+                    <div class="warning">
+                        <strong>⚠️ CONTINUE SELECTIVE ANTIMICROBIALS:</strong> Some patients may need to continue low-dose antimicrobials (e.g., Bacteria-Tox 1 dropper daily) during restoration phase if symptoms return. Titrate down gradually rather than stopping abruptly.
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        function generatePhysicaOngoing(markers) {
+            let html = `
+                <div class="phase">
+                    <h3><span class="phase-number">4</span>Ongoing Maintenance & Prevention</h3>
+                    <p><strong>Primary Goal:</strong> Maintain immune resilience, prevent relapse, support ongoing cellular health, and optimize long-term wellness.</p>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">🛡️ Daily Maintenance Protocol</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">Flora Syntropy</div>
+                        <div class="indication">Daily probiotic support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 capsules daily (can reduce from restoration phase dosing)</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">BioHealth Matrix</div>
+                        <div class="indication">Comprehensive multivitamin/mineral</div>
+                        <div class="dosing"><strong>Dosing:</strong> 4-6 capsules daily with meals</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Solray-D3 + K2 Liposome Spray</div>
+                        <div class="indication">Immune modulation</div>
+                        <div class="dosing"><strong>Dosing:</strong> 10-15 sprays daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Omega GOLD or Bio-Omega 3</div>
+                        <div class="indication">Anti-inflammatory omega-3 fatty acids</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 capsules twice daily</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">CoQ10 Liposome Tincture</div>
+                        <div class="indication">Mitochondrial maintenance</div>
+                        <div class="dosing"><strong>Dosing:</strong> 30 drops daily</div>
+                    </div>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">🔄 Periodic Drainage Support</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">Drainage Milieu (1 week per month)</div>
+                        <div class="indication">Monthly drainage support</div>
+                        <div class="dosing"><strong>Dosing:</strong> 30 drops 2x daily for 1 week each month</div>
+                        <div class="dosing"><strong>Rationale:</strong> Maintains open detox pathways</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">HepataGest Powder (As needed)</div>
+                        <div class="indication">Liver/gallbladder support during stress or dietary indiscretions</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 scoop daily for 1-2 weeks as needed</div>
+                    </div>
+
+                    <h4 style="color: #2C5364; margin: 20px 0 15px 0;">⚡ Immune Support During Stress/Illness</h4>
+
+                    <div class="product-item">
+                        <div class="product-name">Thymus LF + Thymus Code</div>
+                        <div class="indication">Immune support during viral exposures or stress</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 caps + 30 drops 2x daily as needed</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Echina Intrinsic</div>
+                        <div class="indication">Acute immune stimulation</div>
+                        <div class="dosing"><strong>Dosing:</strong> 2 droppers 6x daily for 3-5 days at first sign of illness</div>
+                    </div>
+
+                    <div class="product-item">
+                        <div class="product-name">Camu Camu Vitamin C Liposome</div>
+                        <div class="indication">Increase during illness</div>
+                        <div class="dosing"><strong>Dosing:</strong> 1 tsp 3-6x daily during acute illness</div>
+                    </div>
+
+                    <div class="note">
+                        <strong>🍎 LIFESTYLE & DIETARY RECOMMENDATIONS:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li><strong>Anti-Inflammatory Diet:</strong> Mediterranean-style, high in vegetables, healthy fats, wild-caught fish, organic poultry</li>
+                            <li><strong>Avoid:</strong> Sugar, processed foods, alcohol, conventionally-raised meat (inflammatory)</li>
+                            <li><strong>Sleep:</strong> 7-9 hours nightly; essential for immune function and cellular repair</li>
+                            <li><strong>Stress Management:</strong> Meditation, yoga, nature time - chronic stress reactivates latent infections</li>
+                            <li><strong>Movement:</strong> Gentle exercise (walking, swimming, yoga); avoid over-exertion which can trigger relapse</li>
+                            <li><strong>Mold Avoidance:</strong> Address any mold in home/workplace - mold toxins impair immune function</li>
+                            <li><strong>Tick Prevention:</strong> Protective clothing, tick checks, permethrin-treated clothing in endemic areas</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning">
+                        <strong>⚠️ WARNING SIGNS OF RELAPSE:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>Return of previous symptoms (joint pain, fatigue, brain fog)</li>
+                            <li>New neurological symptoms</li>
+                            <li>Unexplained fevers or night sweats</li>
+                            <li>Persistent fatigue despite rest</li>
+                            <li><strong>ACTION:</strong> Resume drainage support (Lymph 3 + Drainage Milieu) and low-dose antimicrobials immediately. Consult practitioner for re-testing.</li>
+                        </ul>
+                    </div>
+
+                    <div class="note">
+                        <strong>📅 FOLLOW-UP TESTING:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li><strong>20-24 weeks:</strong> Repeat Tickborne panel to assess treatment response</li>
+                            <li><strong>6 months:</strong> Comprehensive metabolic panel, inflammatory markers (CRP, ESR)</li>
+                            <li><strong>Annual:</strong> Repeat Tickborne panel if in endemic area or symptoms return</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <h3>📚 Physica Energetics BioEnergetic Medicine Philosophy</h3>
+                    
+                    <div class="note">
+                        <strong>🌿 THE PHYSICA ENERGETICS APPROACH:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li><strong>BioEnergetic Medicine:</strong> Works at informational/energetic level to restore cellular communication and self-regulation</li>
+                            <li><strong>Drainage First Always:</strong> "The body is a flow system" - must establish drainage before detoxification</li>
+                            <li><strong>Homotoxicology:</strong> Understanding tissue phases of disease - excretion, inflammation, deposition, impregnation, degeneration, dedifferentiation</li>
+                            <li><strong>Spagyric Processing:</strong> All Intrinsic botanicals undergo alchemical Spagyric preparation - separation, purification, recombination</li>
+                            <li><strong>BioPhotonic Matrix:</strong> Himalayan Shilajit, fulvic/humic acids, 72 trace minerals enhance bioavailability and cellular uptake</li>
+                            <li><strong>Homeopathic Homaccords:</strong> Multiple potencies in one formula provide "homeopathic ascendency" - broader therapeutic range</li>
+                            <li><strong>Mesenchyme Support:</strong> All Tox formulas contain Mesenchyme 6X, 9X, 6CH + ATP 5X for ECM drainage</li>
+                        </ul>
+                    </div>
+
+                    <div class="note">
+                        <strong>⏱️ EXPECTED TIMELINE FOR CHRONIC TICKBORNE DISEASE:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li><strong>Weeks 1-4:</strong> Drainage phase - may have initial detox symptoms</li>
+                            <li><strong>Weeks 5-8:</strong> Begin antimicrobials - Herxheimer possible</li>
+                            <li><strong>Weeks 9-12:</strong> Continue treatment - symptoms may fluctuate</li>
+                            <li><strong>Weeks 13-16:</strong> Noticeable improvement in energy, cognition</li>
+                            <li><strong>Weeks 17-20:</strong> Continued healing - 50-70% symptom reduction</li>
+                            <li><strong>Weeks 21-32:</strong> Restoration phase - 70-90% improvement</li>
+                            <li><strong>6-12 Months:</strong> Near-complete symptom resolution with maintenance</li>
+                            <li><strong>Note:</strong> Chronic Lyme can take 12-24 months for complete recovery</li>
+                        </ul>
+                    </div>
+
+                    <div class="note">
+                        <strong>🔬 EVIDENCE BASE:</strong>
+                        <ul style="margin-top: 10px; margin-left: 20px;">
+                            <li>Homeopathic medicine recognized in European Pharmacopoeia, used in 80+ countries</li>
+                            <li>Spagyric processing increases bioactive compound extraction and bioavailability</li>
+                            <li>Fulvic/humic acids enhance nutrient absorption and cellular detoxification</li>
+                            <li>Medicinal mushrooms (Mycelia Intrinsic) have demonstrated immune-modulating effects</li>
+                            <li>Berberine has broad antimicrobial activity including against Borrelia species</li>
+                            <li>Cat's Claw shown to enhance phagocytosis and reduce inflammatory cytokines</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+
+            return html;
+        }
+
+        function resetForm() {
+            if (confirm('Are you sure you want to reset the form? All selections and patient information will be cleared.')) {
+                document.getElementById('patientName').value = '';
+                document.getElementById('patientDOB').value = '';
+                document.getElementById('testDate').value = '';
+                document.getElementById('providerName').value = '';
+                
+                document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                    checkbox.checked = false;
+                    checkbox.closest('.marker-item').classList.remove('detected');
+                });
+
+                document.getElementById('protocolOutput').classList.remove('show');
+                document.getElementById('buttonGroup').style.display = 'none';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            populateMarkers();
+        });
+    </script>
+</body>
+</html>
